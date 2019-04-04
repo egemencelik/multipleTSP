@@ -33,7 +33,7 @@ public class App {
 
             final int cost = mTSP.cost();
 
-            // System.out.println("Total cost is " + cost);
+            //System.out.println("Total cost is " + cost);
 
             if (cost < minCost) {
                 best = mTSP;
@@ -41,10 +41,13 @@ public class App {
             }
         }
 
-
         if (best != null) {
             best.print(params.getVerbose());
             System.out.println("**Total cost is " + best.cost());
+        }
+
+        for(int iter=0;iter<5000000;iter++){
+
         }
 
     }
