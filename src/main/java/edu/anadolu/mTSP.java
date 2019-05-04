@@ -1,5 +1,11 @@
 package edu.anadolu;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class mTSP {
@@ -7,7 +13,7 @@ public class mTSP {
     private int numDepots;
     private int numSalesmen;
     private int random1,random2;
-    private Map<Integer,List<List<Integer>>> routes;
+    public Map<Integer,List<List<Integer>>> routes;
     private Random random;
     private int cost;
     private List<Integer> seenCities;
@@ -30,16 +36,27 @@ public class mTSP {
         this.numDepots=mTsp.numDepots;
         this.numSalesmen=mTsp.numSalesmen;
         random=mTsp.random;
-        this.routes=mTsp.routes;
+        this.routes = new HashMap<>();
+
+        for(int depot:mTsp.routes.keySet()){
+            this.routes.put(depot,new ArrayList<>());
+            for(List<Integer> a:mTsp.routes.get(depot)){
+                routes.get(depot).add(new ArrayList<>());
+                for(int j:a){
+                    this.routes.get(depot).get(mTsp.routes.get(depot).indexOf(a)).add(j);
+                }
+            }
+        }
         seenCities=mTsp.seenCities;
-        cost=0;
-        this.depots= mTsp.depots;
+        this.cost=mTsp.cost;
+        this.depots= new ArrayList<>();
+        this.depots.addAll(mTsp.depots);
         MIN_ROUTE=1;
     }
 
     public void getCities(){
 
-        for(int i=1;i<82;i++){
+        for(int i=0;i<81;i++){
             seenCities.add(i);
         }
     }
@@ -47,7 +64,7 @@ public class mTSP {
     public void placeDepots(){
 
         for(int i=0;i<numDepots;i++){
-            int plate = random.nextInt(81)+1;
+            int plate = random.nextInt(81);
 
             if(!routes.containsKey(plate)){
                 routes.put(plate,new ArrayList<>());
@@ -83,6 +100,7 @@ public class mTSP {
     }
 
     public void validate() {
+        this.cost = 0;
 
         for(int depot:routes.keySet())
             calcCost(depot);
@@ -98,10 +116,10 @@ public class mTSP {
             int current=depot;
 
             for(int i:l){
-                cost+=TurkishNetwork.distance[current-1][i-1];
+                cost+=TurkishNetwork.distance[current][i];
                 current=i;
             }
-            cost+=TurkishNetwork.distance[current-1][depot-1];
+            cost+=TurkishNetwork.distance[current][depot];
         }
     }
 
@@ -143,9 +161,9 @@ public class mTSP {
                     for(int j:a){
 
                         if(j==a.get(a.size()-1)){
-                            System.out.print(TurkishNetwork.cities[j-1]);
+                            System.out.print(TurkishNetwork.cities[j]);
                         }else
-                            System.out.print(TurkishNetwork.cities[j-1]+",");
+                            System.out.print(TurkishNetwork.cities[j]+",");
                     }
                     System.out.println();
                 }
@@ -166,9 +184,8 @@ public class mTSP {
             return;
 
         randomInInterval(randomRoute.size());
-        //System.out.println(routes.get(randomDepot).get(randomRouteIndex));
+
         Collections.swap(routes.get(randomDepot).get(randomRouteIndex),random1,random2);
-        //System.out.println(routes.get(randomDepot).get(randomRouteIndex));
 
     }
 
@@ -182,7 +199,7 @@ public class mTSP {
         random1 = random.nextInt(randomRoute.size());
 
         int newHub = randomRoute.get(random1);
-        //System.out.println(routes);
+
         allRoutes.get(randomRouteIndex).add(random1,randomDepot);
         allRoutes.get(randomRouteIndex).remove(new Integer(newHub));
 
@@ -190,8 +207,6 @@ public class mTSP {
         routes.remove(randomDepot);
         depots.add(newHub);
         depots.remove(new Integer(randomDepot));
-
-        //System.out.println(routes);
 
     }
 
@@ -214,15 +229,12 @@ public class mTSP {
 
         int randomNode1 = randomRoute1.get(random.nextInt(randomRoute1.size()));
         int randomNode2 = randomRoute2.get(random.nextInt(randomRoute2.size()));
-        //System.out.println(routes.get(randomDepot1).get(randomRouteIndex1));
-        //System.out.println(routes.get(randomDepot2).get(randomRouteIndex2));
+
         routes.get(randomDepot1).get(randomRouteIndex1).add(randomRoute1.indexOf(randomNode1),randomNode2);
         routes.get(randomDepot1).get(randomRouteIndex1).remove(new Integer(randomNode1));
 
         routes.get(randomDepot2).get(randomRouteIndex2).add(randomRoute2.indexOf(randomNode2),randomNode1);
         routes.get(randomDepot2).get(randomRouteIndex2).remove(new Integer(randomNode2));
-        //System.out.println(routes.get(randomDepot1).get(randomRouteIndex1));
-        //System.out.println(routes.get(randomDepot2).get(randomRouteIndex2));
 
     }
 
@@ -234,10 +246,9 @@ public class mTSP {
         List<Integer> randomRoute = allRoutes.get(randomRouteIndex);
 
         int randomNode = randomRoute.get(random.nextInt(randomRoute.size()));
-        //System.out.println(routes.get(randomDepot).get(randomRouteIndex));
+
         routes.get(randomDepot).get(randomRouteIndex).remove(new Integer(randomNode));
         routes.get(randomDepot).get(randomRouteIndex).add(randomNode);
-        //System.out.println(routes.get(randomDepot).get(randomRouteIndex));
 
     }
 
@@ -254,19 +265,17 @@ public class mTSP {
         int randomRouteIndex2 = random.nextInt(numSalesmen);
         List<Integer> randomRoute2 = allRoutes2.get(randomRouteIndex2);
 
-        if(randomRoute1==randomRoute2||randomRoute1.size()==1){
-            return;
-        }
+        if(randomRoute1==randomRoute2||randomRoute1.size()==1) return;
+
         int randomNode1 = randomRoute1.get(random.nextInt(randomRoute1.size()));
         int randomNode2 = randomRoute2.get(random.nextInt(randomRoute2.size()));
-        //System.out.println(routes);
+
         routes.get(randomDepot1).get(randomRouteIndex1).remove(new Integer(randomNode1));
 
         if (randomRoute2.indexOf(randomNode2) == randomRoute2.size()-1)
             routes.get(randomDepot2).get(randomRouteIndex2).add(randomNode1);
         else
             routes.get(randomDepot2).get(randomRouteIndex2).add(randomRoute2.indexOf(randomNode2)+1,randomNode1);
-        //System.out.println(routes);
 
     }
 
@@ -277,6 +286,33 @@ public class mTSP {
 
         if(random1==random2)
             randomInInterval(interval);
+    }
+
+    public void writeJson(String filename) throws IOException {
+        JSONObject solution = new JSONObject();
+        JSONArray jsonDepots = new JSONArray();
+        List<JSONObject> jsonObjects = new ArrayList<>();
+        String s;
+
+        for(int depot:routes.keySet()){
+            jsonObjects.add(new JSONObject());
+        }
+
+        for(int i = 0;i<depots.size();i++){
+            jsonObjects.get(i).put("depot",depots.get(i)+"");
+            JSONArray routeForDepot = new JSONArray();
+            for(int j = 0;j<numSalesmen;j++){
+                s="";
+                for(int city:routes.get(depots.get(i)).get(j)){
+                    s+=city+" ";
+                }
+                routeForDepot.add(s.trim());
+            }
+            jsonObjects.get(i).put("routes",routeForDepot);
+        }
+        solution.put("solution",jsonObjects);
+        Files.write(Paths.get(filename), solution.toJSONString().getBytes());
+
     }
 
 }

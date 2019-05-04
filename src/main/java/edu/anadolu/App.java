@@ -2,8 +2,13 @@ package edu.anadolu;
 
 import com.lexicalscope.jewel.cli.ArgumentValidationException;
 import com.lexicalscope.jewel.cli.CliFactory;
-import com.sun.istack.internal.NotNull;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -12,7 +17,7 @@ import java.util.stream.IntStream;
  */
 public class App {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         Params params;
         try {
@@ -22,10 +27,8 @@ public class App {
             return;
         }
 
-
         mTSP best = null;
         int minCost = Integer.MAX_VALUE;
-
 
         for (int i = 0; i < 100_000; i++) {
 
@@ -45,54 +48,74 @@ public class App {
             }
         }
 
-        if (best != null) {
-            best.print(params.getVerbose());
-            System.out.println("**Total cost is " + best.cost());
-
-        }
-        int count = 0;
+        int swapNodesInRoute = 0;
+        int swapHubWithNodeInRoute = 0;
+        int swapNodesBetweenRoutes = 0;
+        int insertNodeInRoute = 0;
+        int insertNodeBetweenRoutes = 0;
 
         for(int iter=0;iter<5000000;iter++){
             mTSP temp = new mTSP(best);
-
             int random = new Random().nextInt(5);
 
-            if(random==0)
+            if(random==0){
                 temp.swapNodesInRoute();
-            else if(random==1)
+                temp.validate();
+                if(temp.cost()<best.cost()){
+                    best = temp;
+                    swapNodesInRoute++;
+                }
+            }
+            else if(random==1){
                 temp.swapHubWithNodeInRoute();
-            else if(random==2)
+                temp.validate();
+                if(temp.cost()<best.cost()){
+                    best = temp;
+                    swapHubWithNodeInRoute++;
+                }
+            }
+            else if(random==2){
                 temp.swapNodesBetweenRoutes();
-            else if(random==3)
+                temp.validate();
+                if(temp.cost()<best.cost()){
+                    best = temp;
+                    swapNodesBetweenRoutes++;
+                }
+            }
+            else if(random==3){
                 temp.insertNodeInRoute();
-            else
+                temp.validate();
+                if(temp.cost()<best.cost()){
+                    best = temp;
+                    insertNodeInRoute++;
+                }
+            }
+            else{
                 temp.insertNodeBetweenRoutes();
-
-            temp.validate();
-
-            if(temp.cost()<best.cost()){
-                best = temp;
-                count++;
+                temp.validate();
+                if(temp.cost()<best.cost()){
+                    best = temp;
+                    insertNodeBetweenRoutes++;
+                }
             }
         }
 
-        /*mTSP temp = new mTSP(best);
-        System.out.println("swapnodesinroute");
-        temp.swapNodesInRoute();
-        System.out.println("swapHubWithNodeInRoute");
-        temp.swapHubWithNodeInRoute();
-        System.out.println("swapNodesBetweenRoutes");
-        temp.swapNodesBetweenRoutes();
-        System.out.println("insertNodeInRoute");
-        temp.insertNodeInRoute();
-        System.out.println("insertNodeBetweenRoutes");
-        temp.insertNodeBetweenRoutes();*/
-        //temp.validate();
-
-        //temp.print(false);
+        best.print(params.getVerbose());
         System.out.println("**Total cost is " + best.cost());
-        System.out.println(count);
-        //best.print(false);
+        System.out.println();
+        JSONObject sampleObject = new JSONObject();
+        sampleObject.put("swapNodesInRoute",swapNodesInRoute);
+        sampleObject.put("swapHubWithNodeInRoute",swapHubWithNodeInRoute);
+        sampleObject.put("swapNodesBetweenRoutes",swapNodesBetweenRoutes);
+        sampleObject.put("insertNodeInRoute",insertNodeInRoute);
+        sampleObject.put("insertNodeBetweenRoutes",insertNodeBetweenRoutes);
+        System.out.println(sampleObject.toString());
+
+        JSONObject map = new JSONObject(best.routes);
+
+        best.writeJson("solution.json");
 
     }
+
+
 }

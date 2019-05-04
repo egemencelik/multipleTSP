@@ -100,7 +100,7 @@ public class CreateImgSol{
             new Point(802,494)//Düzce
     };
     final static File rootDir = new File(System.getProperty("user.dir"));
-    final static File imgDir = new File(rootDir.getPath() + "\\src" + "\\main" + "\\resources" + "\\img"+ "\\tr-map2.jpg");
+    final static File imgDir = new File("/home/egemencelik/Projects/IntelliJ/bim208-hw3-egemencelik-master/src/main/resources/img/tr-map2.jpg");
     final static Image img = new ImageIcon(imgDir.getAbsolutePath()).getImage();
 
     private CreateImgSol(){};
