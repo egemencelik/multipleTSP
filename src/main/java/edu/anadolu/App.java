@@ -115,6 +115,14 @@ public class App {
 
         best.writeJson("solution.json");
 
+
+        /*try {
+            CreateImgSol.create(new File("solution.json"));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }*/
+
+
     }
 
 
