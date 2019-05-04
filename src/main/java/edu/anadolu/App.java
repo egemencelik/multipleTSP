@@ -2,6 +2,10 @@ package edu.anadolu;
 
 import com.lexicalscope.jewel.cli.ArgumentValidationException;
 import com.lexicalscope.jewel.cli.CliFactory;
+import com.sun.istack.internal.NotNull;
+
+import java.util.Random;
+import java.util.stream.IntStream;
 
 /**
  * Hello world!
@@ -44,11 +48,51 @@ public class App {
         if (best != null) {
             best.print(params.getVerbose());
             System.out.println("**Total cost is " + best.cost());
+
         }
+        int count = 0;
 
         for(int iter=0;iter<5000000;iter++){
+            mTSP temp = new mTSP(best);
 
+            int random = new Random().nextInt(5);
+
+            if(random==0)
+                temp.swapNodesInRoute();
+            else if(random==1)
+                temp.swapHubWithNodeInRoute();
+            else if(random==2)
+                temp.swapNodesBetweenRoutes();
+            else if(random==3)
+                temp.insertNodeInRoute();
+            else
+                temp.insertNodeBetweenRoutes();
+
+            temp.validate();
+
+            if(temp.cost()<best.cost()){
+                best = temp;
+                count++;
+            }
         }
+
+        /*mTSP temp = new mTSP(best);
+        System.out.println("swapnodesinroute");
+        temp.swapNodesInRoute();
+        System.out.println("swapHubWithNodeInRoute");
+        temp.swapHubWithNodeInRoute();
+        System.out.println("swapNodesBetweenRoutes");
+        temp.swapNodesBetweenRoutes();
+        System.out.println("insertNodeInRoute");
+        temp.insertNodeInRoute();
+        System.out.println("insertNodeBetweenRoutes");
+        temp.insertNodeBetweenRoutes();*/
+        //temp.validate();
+
+        //temp.print(false);
+        System.out.println("**Total cost is " + best.cost());
+        System.out.println(count);
+        //best.print(false);
 
     }
 }
